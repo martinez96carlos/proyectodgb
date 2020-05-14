@@ -8,20 +8,17 @@ const pool = new Pool({
     port: '5432'
 })
 
+
 const getUser = async (req,res)=>{
     const response = await pool.query('SELECT * FROM recolectors');
     // console.log(response.rows);
     res.status(200).json(response.rows);
 }
+
 const getSolid = async (req,res) =>{
     const response = await pool.query(`SELECT * FROM solids`);
     res.status(200).json(response.rows);
 }
-
-
-
-
-
 
 module.exports = {
     getUser,

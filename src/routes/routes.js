@@ -6,6 +6,7 @@ const { getUser, getSolid } = require ('../controllers/index.controller');
 
 router.get('/users', getUser);
 router.get('/solids', getSolid);
+router.get('')
 
 
 
