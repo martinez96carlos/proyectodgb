@@ -11,6 +11,9 @@ app.use(express.urlencoded({extended:false}));
 //routes
 // app.use(require('./routes/user'));
 app.use(require('./routes/solids'));
+app.use(require('./routes/orders'));
+app.use(require('./routes/users'));
+app.use(require('./routes/recolections'));
 
 
 //starting the serter
