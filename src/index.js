@@ -14,6 +14,7 @@ app.use(express.urlencoded({extended:false}));
 // app.use(require('./routes/orders'));
 // app.use(require('./routes/users'));
 app.use(require('./routes/endpoints'));
+app.use(require('./routes/datamart'));
 
 
 //starting the serter

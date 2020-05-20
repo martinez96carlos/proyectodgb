@@ -2,14 +2,15 @@ const { Router} = require('express');
 const router = Router();
 
 // rutas de ordenes
-const  {getOrders, getOrderById, getOrderByGenerator, createOrder, deleteOrder, getOrderByRecolector, pickOrder} = require('../controllers/orderController');
+const  {getOrders, getOrderById, getOrderByGenerator, createOrder, deleteOrder, getOrderByRecolector, pickOrder,cancelPick} = require('../controllers/orderController');
 router.get('/orders', getOrders);
 router.post('/orders', createOrder);
 router.get('/orders/:id', getOrderById);
 router.get('/ordergenerator/:id', getOrderByGenerator);
 router.get('/orderrecolector/:id', getOrderByRecolector);
 router.put('/orders/:orderid', deleteOrder);
-router.put('/orderpick/', pickOrder)
+router.put('/orderpick/', pickOrder);
+router.put('/cancelpick', cancelPick);
 
 
 // rutas de recolecciones
