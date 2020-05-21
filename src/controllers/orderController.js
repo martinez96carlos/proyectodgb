@@ -2,7 +2,7 @@ const pool = require('../database/connection');
 
 const getOrders = async (req,res) => {
     const response = await pool.query(`
-    select A.order_id , A.generator_id, A.recolector_id, A.order_date ,
+    select A.order_id id, A.generator_id, A.recolector_id, A.order_date ,
     A.order_detail, A.order_image_url, A.order_rate, A.order_latitude , A.order_longitude , A.order_state,
     B.generator_first_name , B.generator_first_lastname , B.generator_phone 
     from orders A, generators B
@@ -54,7 +54,7 @@ const getOrderByGenerator = async (req,res) => {
     const generator_id = req.params.id;
     const response = await pool.query(`
     select A.order_id id, A.generator_id , A.recolector_id , A.order_date ,
-    A.order_detail , A.order_image_url , A.order_rate , A.order_latitude , A.order_longitude,
+    A.order_detail , A.order_image_url , A.order_rate , A.order_latitude , A.order_longitude, A.order_state,
     B.generator_first_name, B.generator_first_lastname
     from orders A, generators B
     where A.generator_id = $1 and B.generator_id = $1 ;`,[generator_id],(error, response, fields) => {
@@ -69,10 +69,11 @@ const getOrderByGenerator = async (req,res) => {
 const getOrderByRecolector = async (req,res) => {
     const recolector_id = req.params.id;
     const response = await pool.query(`
-    select A.order_id , A.generator_id , A.recolector_id , A.order_date ,
-    A.order_detail , A.order_image_url , A.order_rate , A.order_latitude , A.order_longitude 
-    from orders A, recolectors B
-    where A.recolector_id = $1 and B.recolector_id = $1;`,[recolector_id],(error, response, fields) => {
+    select A.order_id id, A.generator_id , A.recolector_id , A.order_date ,
+    A.order_detail , A.order_image_url , A.order_rate , A.order_latitude , A.order_longitude, A.order_state,
+    C.generator_first_name, C.generator_first_lastname, C.generator_phone
+    from orders A, recolectors B, generators C
+    where A.recolector_id = $1 and B.recolector_id = $1 and A.generator_id = C.generator_id order by order_id;`,[recolector_id],(error, response, fields) => {
         if (!error){
            res.status(200).json(response.rows);
         } else {
@@ -88,11 +89,11 @@ const pickOrder = async (req,res) => {
     select * from orders where order_id = $1;
     `,[order_id],(error, response, fields) => {
     if(!error){
-        // console.log(response.rows[0]);
+        console.log(response.rows[0]);
         if (response.rows[0].order_state == 0){
             const update = pool.query(`update orders set order_state = 1, recolector_id = $2 where order_id = $1;`,[order_id, recolector_id],(error, response, fields) => {
                 if (!error){
-                    res.status(200).json({status: 'Orden en recoleccion'});        
+                    res.status(200).json({status: 'Ya puedes recolectar la orden'});        
                  } else {
                     res.json({status: 'Error al recolectar'});
                  }

@@ -1,4 +1,5 @@
 const { Router} = require('express');
+const bcrypt = require('bcrypt');
 const router = Router();
 
 // rutas de ordenes
@@ -29,6 +30,8 @@ const  {getUser, createRecolector, createGenerator } = require('../controllers/u
 router.get('/login', getUser);
 router.post('/createre', createRecolector);
 router.post('/createge', createGenerator);
+router.put('/editrecolector');
+router.put('/editgenerator');
 
 
 
