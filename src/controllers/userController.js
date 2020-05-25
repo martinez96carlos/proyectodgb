@@ -4,8 +4,8 @@ const bcrypt = require('bcrypt');
 
 
 const verificador = (bodyPass,dbPass) => {
-    console.log(bodyPass);
-    console.log(dbPass);
+    // console.log(bodyPass);
+    // console.log(dbPass);
     const resultado = bcrypt.compareSync(bodyPass, dbPass)
     // contra = bcrypt.compare(bodyPass, dbPass, function(err, result) {
     //     return result;
@@ -19,7 +19,7 @@ const getUser = async (req,res) => {
         if(!error) {
             if(passwordge.rows[0]){
                 const contrage = verificador(pass,passwordge.rows[0].generator_password);
-                console.log(contrage);
+                // console.log(contrage);
                 if(contrage == true){
                     // res.json('exito');
                      const generador = pool.query(`
@@ -55,7 +55,7 @@ const getUser = async (req,res) => {
                     if(!error){
                         if(passwordre.rows[0]){
                             const contrare  = verificador(pass,passwordre.rows[0].recolector_password)
-                            console.log(contrare);
+                            // console.log(contrare);
                             if(contrare == true){
                                 // res.json('exito');
                                 const recolector = pool.query(`
@@ -71,7 +71,8 @@ const getUser = async (req,res) => {
                                 recolector_phone ,
                                 recolector_ci ,
                                 recolector_city ,
-                                recolector_picture_url
+                                recolector_picture_url,
+                                recolector_rate
                                 from recolectors where recolector_email = $1 and recolector_password = $2
                                 `, [email,passwordre.rows[0].recolector_password],(error, recolector, fiels)=>{
                                         if (recolector.rows[0]){
@@ -151,7 +152,6 @@ const getUser = async (req,res) => {
 // }
 
 const createRecolector = async (req,res) => {
-    
     const {recolector_first_name,
         recolector_second_name,
         recolector_first_lastname,
@@ -167,7 +167,7 @@ const createRecolector = async (req,res) => {
     const hashedPassword =  await bcrypt.hash(recolector_password, 10);
     const response = await pool.query('select * from recolectors where recolector_email = $1 or recolector_ci = $2'
         ,[recolector_email,recolector_ci],(error, response, fields) => {
-        console.log(hashedPassword);
+        // console.log(hashedPassword);
         if(response.rows[0]){
             res.json('Ya existe el usuario o ci');
         }else {
@@ -186,9 +186,10 @@ const createRecolector = async (req,res) => {
                 recolector_city,
                 recolector_state,
                 recolector_group,
-                recolector_picture_url)
+                recolector_picture_url,
+                recolector_rate)
             values
-            ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,1,'Eco Recolectoras del Norte','') returning recolector_email;
+            ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,1,'Eco Recolectoras del Norte','',0.0) returning recolector_email;
             `,[recolector_first_name,
                 recolector_second_name,
                 recolector_first_lastname,
@@ -210,6 +211,8 @@ const createRecolector = async (req,res) => {
         }
     })
 }
+
+
 
 const createGenerator = async (req,res) => {
     const {generator_first_name,
@@ -269,8 +272,150 @@ const createGenerator = async (req,res) => {
     })
 }
 
-// const registerGe =async (req,res) => {} ;
+const editGenerator = async (req,res)=>{
+   const {id} = req.headers;
+   const {
+    generator_first_name,
+    generator_second_name,
+    generator_first_lastname,
+    generator_second_lastname,
+    generator_born_date,
+    generator_gender,
+    generator_email,
+    generator_phone,
+    generator_ci,
+    generator_place,
+    generator_picture_url
+    } = req.body;
+    console.log(req.body);
+    console.log(req.headers.id);
+    const response = await pool.query('select * from generators where generator_email = $1 or generator_ci =$2;'
+    ,[generator_email,generator_ci],(error, response, fields) => {
+        if(!error){
+            if(response.rows[0]){
+                const idgenerator = response.rows[0].generator_id;
+                if(idgenerator != id){
+                    res.json({status: 'Elige otro correo o CI, uno de ellos o los dos ya estan registrados'});
+                } else {
+                    const update = pool.query(`
+                    update generators set 
+                        generator_first_name = $2,
+                        generator_second_name = $3,
+                        generator_first_lastname = $4,
+                        generator_second_lastname = $5,
+                        generator_born_date = $6,
+                        generator_gender = $7,
+                        generator_email = $8,
+                        generator_phone = $9,
+                        generator_ci = $10,
+                        generator_place = $11,
+                        generator_picture_url = $12
+                    where 
+                        generator_id = $1;
+                    `
+                    ,[  id,
+                        generator_first_name,
+                        generator_second_name,
+                        generator_first_lastname,
+                        generator_second_lastname,
+                        generator_born_date,
+                        generator_gender,
+                        generator_email,
+                        generator_phone,
+                        generator_ci,
+                        generator_place,
+                        generator_picture_url]
+                    ,(error, update, fields) => {
+                        if(!error){
+                            res.json({status: 'Datos actualizados correctamente'});
+                        }else{
+                            console.log(error);
+                        }
+                    
+                    });
+                }
+            } else {
+              res.json({status:'Ocurrio un error, revisa tus datos nuevamente'});
+            }
+        } else {
+            console.log(error);
+        }
+    });
+}
+
+const editRecolector = async (req,res)=>{
+    const {id} = req.headers;
+    const {
+        recolector_first_name,
+        recolector_second_name,
+        recolector_first_lastname,
+        recolector_second_lastname,
+        recolector_born_date,
+        recolector_gender,
+        recolector_email,
+        recolector_phone,
+        recolector_ci,
+        recolector_city,
+        recolector_picture_url
+     } = req.body;
+     console.log(req.body);
+     console.log(req.headers.id);
+     const response = await pool.query('select * from recolectors where recolector_email = $1 or recolector_ci =$2;'
+     ,[recolector_email,recolector_ci],(error, response, fields) => {
+         if(!error){
+             if(response.rows[0]){
+                 const idrecolector = response.rows[0].recolector_id;
+                 if(idrecolector != id){
+                     res.json({status: 'Elige otro correo o CI, uno de ellos o los dos ya estan registrados'});
+                 } else {
+                     const update = pool.query(`
+                     update recolectors set 
+                        recolector_first_name = $2,
+                        recolector_second_name = $3,
+                        recolector_first_lastname = $4,
+                        recolector_second_lastname = $5,
+                        recolector_born_date = $6,
+                        recolector_gender = $7,
+                        recolector_email = $8,
+                        recolector_phone = $9,
+                        recolector_ci = $10,
+                        recolector_city = $11,
+                        recolector_picture_url = $12
+                     where 
+                         recolector_id = $1;
+                     `
+                     ,[  id,
+                        recolector_first_name,
+                        recolector_second_name,
+                        recolector_first_lastname,
+                        recolector_second_lastname,
+                        recolector_born_date,
+                        recolector_gender,
+                        recolector_email,
+                        recolector_phone,
+                        recolector_ci,
+                        recolector_city,
+                        recolector_picture_url]
+                     ,(error, update, fields) => {
+                         if(!error){
+                             res.json({status: 'Datos actualizados correctamente'});
+                         }else{
+                             console.log(error);
+                         }
+                     
+                     });
+                 }
+             } else {
+               res.json({status:'Ocurrio un error, revisa tus datos nuevamente'});
+             }
+         } else {
+             console.log(error);
+         }
+     });
+ }
+
+
 
 module.exports = {
-    getUser, createRecolector ,createGenerator
+    getUser, createRecolector ,createGenerator, editGenerator, editRecolector
 }
