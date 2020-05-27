@@ -3,8 +3,9 @@ const bcrypt = require('bcrypt');
 const router = Router();
 
 // rutas de ordenes
-const  {getOrders, getOrderById, getOrderByGenerator, createOrder, deleteOrder, getOrderByRecolector, pickOrder,cancelPick} = require('../controllers/orderController');
+const  {getOrders, getOrderById, getOrderByGenerator, createOrder, deleteOrder, getOrderByRecolector, pickOrder,cancelPick, getRecolectedOrders} = require('../controllers/orderController');
 router.get('/orders', getOrders);
+router.get('/recolected', getRecolectedOrders);
 router.post('/orders', createOrder);
 router.get('/orders/:id', getOrderById);
 router.get('/ordergenerator/:id', getOrderByGenerator);

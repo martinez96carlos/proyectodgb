@@ -8,16 +8,12 @@ const getSolids = async (req,res) => {
         if (!error){
            res.status(200).json(response.rows);
         } else {
-            console.log(error);
+            console.log('Error al obtener solidos');
         }
     });
 }
 
 
-const logini =  async (req,res) => {
-    const {email,pass} = req.headers;
-    console.log(email, pass);
-}
 module.exports = {
-    getSolids, logini
+    getSolids
 }

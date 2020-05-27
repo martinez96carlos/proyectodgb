@@ -7,7 +7,7 @@ const getPrueba = async (req,res) => {
         if (!error){
            res.status(200).json(response.rows);
         } else {
-            console.log(error);
+           console.log(error);
         }
     });
 }

@@ -9,7 +9,7 @@ const getRecolectionByOrder = async (req,res) => {
         if (!error){
            res.status(200).json(response.rows);
         } else {
-            console.log(error);
+            console.log('Error al obtener recolecciones');
         }
     });
 }
@@ -22,13 +22,15 @@ const registerRecolections = (req,res) => {
     let weight, solidID, i = 0;
     console.log(largo);
 
-    function insertar(solid_id ,weights){
+    async function insertar(solid_id ,weights){
         const response =  pool.query(`
             insert into recolections (solid_id, order_id, recolection_weight, recolection_state) values ($1,$2,$3,1); `,[solid_id, orderid, weights],(error, response, fields) => {
                 if (!error){
+                    // res.json({status: 'Recoleccion registrada correctamente'});
                     console.log('Recoleccion registrada');
                 } else {
-                    console.log('Error recoleccion no registrado');
+                    res.json({status: 'Recoleccion NO registrada'});
+                    console.log('Error recoleccion no registrada');
                 }
             });
     }
@@ -38,14 +40,16 @@ const registerRecolections = (req,res) => {
         console.log(weight,solidID);
         insertar(solidID , weight);
         i++
+      
     }while(i<largo);
 
-    const update = pool.query('update orders set order_rate = $1 where order_id = $2', [rate,orderid],(error, response, fields) => {
+    const update = pool.query('update orders set order_rate = $1, order_state = $3 where order_id = $2', [rate,orderid,2],(error, response, fields) => {
         if (!error){
             console.log('exito');
-            res.status(200).json({status: 'Recoleccion finalizada'})
+            res.status(200).json({status: 'Recoleccion finalizada correctamente'})
         } else {
-            console.log('Error');
+            res.json({status: 'Recoleccion no registrada'});
+            console.log('Error al actualizar orden luego de recoleccion');
         }
     });
         

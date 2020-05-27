@@ -43,7 +43,7 @@ const getUser = async (req,res) => {
                                     res.status(200).json(generador.rows[0]);
                                 } else {
                                     res.json({status: 'Verificar datos, son erroneos'});
-                                    console.log(error);
+                                    console.log('Verificar datos, son erroneos');
                                 }
                             });
                 }else{
@@ -80,7 +80,7 @@ const getUser = async (req,res) => {
                                             res.status(200).json(recolector.rows[0]);
                                         } else { 
                                             res.json({status: 'Verificar datos, son erroneos'});
-                                            console.log(error);
+                                            console.log('Verificar datos, son erroneos');
                                         }
                                     }); 
                             }else{
@@ -90,12 +90,12 @@ const getUser = async (req,res) => {
                             res.json({status: 'No existe usuario'})
                         }
                     }else{
-                        console.log(error);
+                        console.log('No se pudo obtener datos de usuarios');
                     }
                 });
             }
         }else{
-            console.log(error);
+            console.log('ocurrio un error en el login');
         }
     });
 }
@@ -206,6 +206,7 @@ const createRecolector = async (req,res) => {
                     res.status(200).json([false]);
                 } else {
                     res.json({status: 'Registro fallido, revise los datos'})
+                    console.log('registro fallido de recolector');
                 }
             });
         }
