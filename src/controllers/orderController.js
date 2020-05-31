@@ -176,9 +176,42 @@ const deleteOrder = async (req,res) => {
     });
 }
 
+const getOrderRates = async (req,res) => {
+    console.log(req.params);
+    const order_id = req.params.orderid;
+    const response = await pool.query(`select A.order_rate, A.order_recolection_rate from orders A WHERE A.order_id = $1 ;`,[order_id], (error,response,fields) => {
+        if(!error){
+            // console.log(response.rows[0]);
+            res.json(response.rows[0]);
+        }else{
+            console.log(error);
+        }
+    })
+
+}
 
 
+//update orders set order_recolection_rate = $1 where order_id = $2;
+
+
+const rateRecolection =  (req,res) => {
+    const {order_id, recolection_rate} = req.headers;
+    const verif = pool.query(`select order_state from orders where order_id = $1;`, [order_id], (error,verif,fiels) => {
+        if(!error){
+            if(verif.rows[0].order_state == 2){
+                const response =  pool.query(`update orders set order_recolection_rate = $1 where order_id = $2;`,[recolection_rate, order_id], (error,verif,fiels) => {
+                res.json({status: 'Recoleccion Calificada'});
+                })
+            }else{
+                res.json({status: 'Error, la recoleccion no finalizo'});
+            }
+        } else {
+            console.log(error);
+        }
+    })
+    
+}
 
 module.exports = {
-    getOrders , getOrderById ,getOrderByGenerator, createOrder ,deleteOrder, getOrderByRecolector, pickOrder, cancelPick, getRecolectedOrders
+    getOrders , getOrderById ,getOrderByGenerator, createOrder ,deleteOrder, getOrderByRecolector, pickOrder, cancelPick, getRecolectedOrders, getOrderRates, rateRecolection
 }
