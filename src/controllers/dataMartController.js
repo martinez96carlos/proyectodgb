@@ -57,11 +57,12 @@ const getVolumenPorCiudad = async (req,res) => {
 }
 const getTopFiveRecolectors = async (req,res) => {
     const response = await pool.query(`
-    select CONCAT(A.nombre,' ',A.apellido,' ',A.city), round( CAST(COALESCE(sum(C.weight),0) as decimal), 2) as volumen
+    select CONCAT(A.nombre,' ',A.city), round( CAST(COALESCE(sum(C.weight),0) as decimal), 2) as volumen
     from dim_recolector A
     LEFT JOIN dim_orders B ON B.recolector_id = A.recolector_id
     LEFT JOIN fact_recolection C ON C.order_id = B.order_id
     group by A.nombre, A.apellido, A.city
+    order by round( CAST(COALESCE(sum(C.weight),0) as decimal), 2) desc
     limit 5`,(error, response, fields) => {
         if (!error){
            res.status(200).json(response.rows);
