@@ -1,7 +1,48 @@
 const pool = require('../database/connection');
 const bcrypt = require('bcrypt');
 
-
+const updateGeneratorRate = async (geId) => {
+    return new Promise((res,rej) => {
+        let promedio;
+        const select = pool.query('select CAST(round(AVG(order_rate)::numeric,2) as FLOAT) as average from orders where generator_id = $1 and order_rate > 0 ;', [geId],  (error, select, fields) => {
+            if(!error) {
+                promedio = select.rows[0].average;
+                res(select.rows[0].average);
+                const update = pool.query('update generators set generator_rate = $1 where generator_id = $2',[promedio,geId], (error, update, fields) => {
+                    if(!error) {
+                        console.log('Actualizacion de generator_rate finalizada correctamente');
+                    } else {
+                        console.log('Error al actualizar rate de generador');
+                    }
+                })
+            } else {
+                console.log('Error al seleccionar el promedio de la calidad de separacion')
+            }
+        })
+    })
+    
+}
+const updateRecolectorRate = async (reId) => {
+    return new Promise((res,rej) => {
+        let promedio;
+        const select = pool.query('select CAST(round(AVG(order_recolection_rate)::numeric,2) as FLOAT) as average from orders where recolector_id = $1 and order_recolection_rate > 0;', [reId],  (error, select, fields) => {
+            if(!error) {
+                promedio = select.rows[0].average;
+                res(select.rows[0].average);
+                const update = pool.query('update recolectors set recolector_rate = $1 where recolector_id = $2',[promedio,reId], (error, update, fields) => {
+                    if(!error) {
+                        console.log('Actualizacion de recolectr_rate finalizada correctamente');
+                    } else {
+                        console.log('Error al actualizar rate de recolector');
+                    }
+                })
+            } else {
+                console.log('Error al seleccionar el promedio de la calidad de recoleccion')
+            }
+        })
+    })
+    
+}
 
 const verificador = (bodyPass,dbPass) => {
     // console.log(bodyPass);
@@ -40,9 +81,18 @@ const getUser = async (req,res) => {
                             from generators where generator_email = $1 and generator_password = $2;
                             `,[email,passwordge.rows[0].generator_password],(error, generador, fields) => {
                                 if (generador.rows[0]){
-                                    generador.rows[0].generator = true;
-                                    res.status(200).json(generador.rows[0]);
-                                    console.log('inicio de sesion');
+                                    const ge_id = generador.rows[0].generator_id;
+                                    const ratege = updateGeneratorRate(ge_id).then((respuesta) => {
+                                        if(respuesta == null){
+                                            generador.rows[0].generator_rate = 0;    
+                                        }else{
+                                            generador.rows[0].generator_rate = respuesta;    
+                                        }
+                                        generador.rows[0].generator = true;
+                                        res.status(200).json(generador.rows[0]);
+                                        
+                                    })
+                                    console.log('inicio de sesion Generado');
                                 } else {
                                     res.json({status: 'Verificar datos, son erroneos'});
                                     console.log('Verificar datos, son erroneos');
@@ -78,9 +128,18 @@ const getUser = async (req,res) => {
                                 from recolectors where recolector_email = $1 and recolector_password = $2
                                 `, [email,passwordre.rows[0].recolector_password],(error, recolector, fiels)=>{
                                         if (recolector.rows[0]){
-                                            recolector.rows[0].generator = false;
-                                            res.status(200).json(recolector.rows[0]);
-                                            console.log('inicio de sesion')
+                                            const re_id = recolector.rows[0].recolector_id;
+                                            const ratege = updateRecolectorRate(re_id).then((respuesta) => {
+                                                if(respuesta == null){
+                                                    recolector.rows[0].recolector_rate = 0;
+                                                }else{
+                                                    recolector.rows[0].recolector_rate = respuesta;
+                                                }
+                                                recolector.rows[0].generator = false;
+                                                res.status(200).json(recolector.rows[0]);
+                                                
+                                            })
+                                            console.log('inicio de sesion Recolector')
                                         } else { 
                                             res.json({status: 'Verificar datos, son erroneos'});
                                             console.log('Verificar datos, son erroneos');

@@ -16,6 +16,7 @@ const getRecolectionByOrder = async (req,res) => {
 }
 
 
+
 const registerRecolections = (req,res) => {
     const a = req.body;
     const {orderid, rate} = req.headers;
@@ -43,7 +44,7 @@ const registerRecolections = (req,res) => {
         i++
       
     }while(i<largo);
-
+    //----------------------
     const update = pool.query('update orders set order_rate = $1, order_state = $3 where order_id = $2', [rate,orderid,2],(error, response, fields) => {
         if (!error){
             console.log('exito');

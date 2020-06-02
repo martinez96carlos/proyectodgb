@@ -191,7 +191,6 @@ const getOrderRates = async (req,res) => {
 }
 
 
-//update orders set order_recolection_rate = $1 where order_id = $2;
 
 
 const rateRecolection =  (req,res) => {
